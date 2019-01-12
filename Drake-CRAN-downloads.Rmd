@@ -1,0 +1,108 @@
+---
+title: "CRAN logs"
+author: "Karthik"
+date: "1/12/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(cranlogs)
+library(drake)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(rvest)
+```
+
+```{r}
+make_my_table <- function(downloads){
+  group_by(downloads, package) %>%
+    summarize(mean_downloads = mean(count))
+}
+
+make_my_plot <- function(downloads){
+  ggplot(downloads) +
+    geom_line(aes(x = date, y = count, group = package, color = package))
+}
+
+package_list <- c(
+  "knitr",
+  "Rcpp",
+  "ggplot2"
+)
+```
+
+```{r}
+data_plan <- drake_plan(
+  older = cran_downloads(
+    packages = package_list,
+    from = "2016-11-01",
+    to = "2016-12-01"
+  ),
+  recent = target(
+    command = cran_downloads(
+      packages = package_list,
+      when = "last-month"
+    ),
+    trigger = trigger(change = latest_log_date())
+  )
+)
+
+latest_log_date <- function(){
+  read_html("http://cran-logs.rstudio.com/") %>%
+    html_nodes("li:last-of-type") %>%
+    html_nodes("a:last-of-type") %>%
+    html_text() %>%
+    max
+}
+```
+
+
+```{r}
+output_types <- drake_plan(
+  averages = make_my_table(dataset__),
+  plot = make_my_plot(dataset__)
+)
+
+output_plan <- evaluate_plan(
+  plan = output_types,
+  wildcard = "dataset__",
+  values = data_plan$target
+)
+
+output_plan
+```
+
+
+```{r}
+output_types <- drake_plan(
+  averages = make_my_table(dataset__),
+  plot = make_my_plot(dataset__)
+)
+
+output_plan <- evaluate_plan(
+  plan = output_types,
+  wildcard = "dataset__",
+  values = data_plan$target
+)
+
+output_plan
+```
+
+```{r}
+whole_plan <- bind_plans(
+  data_plan,
+  output_plan,
+  report_plan
+)
+
+whole_plan
+make(whole_plan)
+```
+
+
+
