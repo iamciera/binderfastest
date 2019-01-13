@@ -1,11 +1,10 @@
-FROM rocker/binder:latest
-
-USER root
-COPY . ${HOME}
-RUN chown -R ${NB_USER} ${HOME}
-
-## Become normal user again
-USER ${NB_USER}
-RUN wget https://github.com/karthik/binder-test-fastest/raw/master/DESCRIPTION && \
-R -e "devtools::install_deps()"
-
+FROM rocker/binder:latest                                                                                                                                                                                                                                                                                                                                                                                                       
+LABEL maintainer="karthik"                                                                                                                                                                                                                                                                                                                                                                                                      
+RUN export DEBIAN_FRONTEND=noninteractive; apt-get -y update \
+  && apt-get install -y git-core \
+	libcurl4-openssl-dev \
+	libssl-dev \
+	make                                                                                                                                                                                                                                                                        
+RUN ["install2.r", "assertthat", "backports", "callr", "cli", "crayon", "curl", "desc", "devtools", "digest", "formatR", "fs", "futile.logger", "futile.options", "lambda.r", "magrittr", "memoise", "packrat", "pkgbuild", "pkgload", "prettyunits", "processx", "ps", "R6", "Rcpp", "remotes", "rlang", "rprojroot", "rstudioapi", "semver", "sessioninfo", "stevedore", "stringi", "stringr", "testthat", "usethis", "withr"]
+RUN ["installGithub.r", "karthik/coyote@acad4665e673c084114ab18df1d281687d06ecf8", "tidyverse/glue@35c61e93f6844c757672574972e59920fb9f0cf6"]                                                                                                                                                                                                                                                                                   
+                                                                                                                                                                                                    
