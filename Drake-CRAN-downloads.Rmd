@@ -91,6 +91,11 @@ output_plan <- evaluate_plan(
 )
 
 output_plan
+
+
+report_plan <- drake_plan(
+  report = knit(knitr_in("report.Rmd"), file_out("report.md"), quiet = TRUE)
+)
 ```
 
 ```{r}
